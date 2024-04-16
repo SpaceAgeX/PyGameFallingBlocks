@@ -18,7 +18,7 @@ clock = pygame.time.Clock()
 FPS = 60
 
 #colours
-colours = [(58,123,170), (125,143,174), (161,180,193), (240,185,185), (255,255,255), (255,209,89), (0,0,0)]
+colors = [(58,123,170), (125,143,174), (161,180,193), (240,185,185), (255,255,255), (255,209,89), (0,0,0)]
 
 #create class for squares
 class Square(pygame.sprite.Sprite):
@@ -29,14 +29,27 @@ class Square(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = (x, y)
     self.vel = 5
+    self.cleared = False
 
-  def update(self,squares):
+  def update(self,squares,Button):
     self.rect.move_ip(0, self.vel)
-    #check if sprite has gone off screen
-    if self.rect.bottom > SCREEN_HEIGHT:
-      self.vel = 0
-    elif len(pygame.sprite.spritecollide(self,squares,False)) >= 2:
+    #check if sprite has been cleared
+    if self.cleared:
+      self.vel = 10
+      if self.rect.top > SCREEN_HEIGHT:
+        self.kill()
+
+    #check if sprite has collided
+
+    elif len(pygame.sprite.spritecollide(self,squares,False)) >= 2: 
         self.vel = 0
+
+    elif self.rect.bottom > SCREEN_HEIGHT:
+      self.vel = 0
+
+    #check if sprite is in the button
+    if pygame.Rect.colliderect(self.rect, Button):
+      self.kill()
     
 
 
@@ -62,7 +75,7 @@ def main():
     screen.fill((1,32,54))
 
     #update sprite group
-    squares.update(squares)
+    squares.update(squares, clear.rect)
 
     #draw sprite group
     squares.draw(screen)
@@ -70,7 +83,7 @@ def main():
     
     if clear.draw(screen):
       for x in squares:
-        x.kill()
+        x.cleared = True
 
     #print(squares)
 
@@ -83,7 +96,7 @@ def main():
         #get mouse coordinates
         pos = pygame.mouse.get_pos()
         #create square
-        square = Square(random.choice(colours), pos[0], pos[1])
+        square = Square(random.choice(colors), pos[0], pos[1])
         squares.add(square)
       #quit program
       if event.type == pygame.QUIT:
